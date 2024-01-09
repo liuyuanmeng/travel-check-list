@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: false },
@@ -19,15 +21,42 @@ function Logo() {
 
 }
 function Form() {
+  // controlled element -> create a piece of state
+  // use on the element that we want to control
+  // update the state
+  const [description, setDescription] = useState("")
+  const [quantity, setQuantity] = useState(1)
+
+
+  // avid reload
+  function handleSubmit(e) {
+    e.preventDefault()
+    console.log(e)
+
+  }
+  // add a guard clause
+  if (!description) return
+
+  const newItem = { description, quantity, packed: false, id: Date.now() }
+  // once submited go back to original 
+  setDescription('')
+  setQuantity(1)
+
   return (
-    <form className="add-form">
+    <form className="add-form" onSubmit={handleSubmit}>
       <h3>What do you need for your trip?</h3>
-      <select>
+      {/* the value is walys string needed coverted */}
+      <select value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}>
         {/* javascript array form, use alot in react */}
         {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
-          <option value={num} key={num}></option>
+          <option value={num} key={num}>
+            {num}
+          </option>
         ))}
       </select>
+      <input type="text" placeholder="Item..."
+        // always need the value and the onchange
+        value={description} onChange={(e) => setDescription(e.target.value)} />
 
     </form>
   )

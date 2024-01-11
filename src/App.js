@@ -27,7 +27,7 @@ export default function App() {
         onDeleteItem={handleDeleteItem}
         onToggleItem={handleToggleItem}
       />
-      <Stats />
+      <Stats items={items} />
     </div>
   );
 }
@@ -83,19 +83,44 @@ function Form({ onAddItems }) {
 }
 
 function PackingList({ items, onDeleteItem, onToggleItem }) {
+  const [sortBy, setSortBy] = useState("input")
+  let sortedItems
+  // the sortedItems are just equal to the items themselves, the one we receieve as a prop above
+  if (sortBy === "input") sortedItems = items;
+
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description))
+
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed))
+  // covert bullion to a number
+
+
   return (
     <div className="list">
+      {/* passing as props, when components needed */}
       <ul>
-        {/* the name of the componet,the name of the prop and then here the object itsef call back function */}
-        {items.map((item) => (
+        {/* we will always redering the sorted items */}
+        {sortedItems.map((item) => (
           <Item
             item={item}
             onDeleteItem={onDeleteItem}
-            onToggleItem={onDeleteItem}
+            onToggleItem={onToggleItem}
             key={item.id}
           />
         ))}
       </ul>
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input order</option>
+          <option value="description">Sort by description</option>
+          <option value="packed">Sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -108,20 +133,34 @@ function Item({ item, onDeleteItem, onToggleItem }) {
         onChange={() => onToggleItem(item.id)}
       />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
-        {item.description} {item.quantity}
+        {item.quantity} {item.description}
       </span>
       <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
-    // call the delite only whenn the event happends,
   );
+  // call delete when event happens
 }
 
-function Stats() {
+function Stats({ items }) {
+  // use case of an early return as conditional rendering
+  if (!items.length)
+    return (
+      <p className="stats">
+        <em>Start adding some items to your packing list 🚀</em>
+      </p>
+    )
+
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const percentage = Math.round((numPacked / numItems) * 100);
+
   return (
     <footer className="stats">
-      <em>you have x items on your list, and you already packed x (x%)</em>
+      <em>
+        {percentage === 100
+          ? "You got everthing! ready to go"
+          : `you have ${numItems} items on your list, and you already packed${numPacked} (${percentage} %)`}
+      </em>
     </footer>
   );
 }
-
-
